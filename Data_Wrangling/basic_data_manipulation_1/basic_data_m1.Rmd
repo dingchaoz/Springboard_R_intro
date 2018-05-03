@@ -1,0 +1,72 @@
+---
+title: "1_baisc_data_manipulation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(tidyr)
+```
+
+## Task 0
+Load the data in Rstudio
+
+```{r}
+df <- read.csv('refine_original.csv')
+```
+
+## Task 1 
+Clean up brand names
+```{r}
+df <- df %>% mutate(company = tolower(company))
+```
+
+
+```{r pressure, echo=FALSE}
+df1_1 <- df %>% mutate(company=ifelse(grepl('^ph|fi', company), 'phillips', company))
+df1_2 <- df1_1 %>% mutate(company=ifelse(grepl('^a', company), 'akzo', company))
+df1_3 <- df1_2 %>% mutate(company=ifelse(grepl('^v', company), 'van houten', company))
+df1_4 <- df1_3 %>% mutate(company=ifelse(grepl('^u', company), 'unilever', company))
+```
+
+## Task2
+Seperate product code and number
+```{r}
+df2 <- df1_4 %>% separate(Product.code...number, c("product_code", "product_number"), sep = "-")
+```
+
+## Task3
+Add product categories 
+```{r}
+df3_1 <- df2 %>% mutate(product_category = gsub("p", "Smartphone", product_code))
+df3_2 <- df3_1 %>% mutate(product_category = gsub("v", "TV", product_category))
+df3_3 <- df3_2 %>% mutate(product_category = gsub("x", "Laptop", product_category))
+df3_4 <- df3_3 %>% mutate(product_category = gsub("q", "Tablet", product_category))
+```
+
+## Task4
+Add full address for geocoding
+```{r}
+df4 <- df3_4 %>% unite("full_address", address, city, country, sep = ",")
+
+```
+
+## Task5
+```{r}
+df5_1 <- df4 %>% mutate( company_philips = ifelse(company == "philips", 1, 0))
+df5_2 <- df5_1 %>% mutate( company_akzo = ifelse(company == "akzo", 1, 0))
+df5_3 <- df5_2 %>% mutate( company_van_houten = ifelse(company == "van", 1, 0))
+df5_4 <- df5_3 %>% mutate( company_unilever = ifelse(company == "unilever", 1, 0))
+df5_5 <- df5_4 %>% mutate( product_smartphone = ifelse(product_category == "Smartphone", 1, 0))
+df5_6 <- df5_5 %>% mutate( product_laptop = ifelse(product_category == "Laptop", 1, 0))
+df5_7 <- df5_6 %>% mutate( product_tv = ifelse(product_category == "TV", 1, 0))
+df5_8 <- df5_7 %>% mutate( product_tablet = ifelse(product_category == "Tablet", 1, 0))
+
+```
+
+## Task 6
+Save to a new file
+```{r}
+write.csv(df5_8,'refine_clean.csv')
+```

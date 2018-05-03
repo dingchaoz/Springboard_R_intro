@@ -15,7 +15,7 @@ Read the csv file
 library(readr)
 library(dplyr)
 library(tidyr)
-gather_spread_test <- read_csv("Data_Wrangling/gather_spread_test.csv")
+gather_spread_test <- read_csv("Kurtis_spread_gather_questions//gather_spread_test.csv")
 ```
 
 ## Gather:
