@@ -1,0 +1,46 @@
+---
+title: "Spread_Gather_Test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+Read the csv file
+
+```{r pressure, echo=FALSE}
+library(readr)
+library(dplyr)
+library(tidyr)
+gather_spread_test <- read_csv("Data_Wrangling/gather_spread_test.csv")
+```
+
+## Gather:
+
+Gather Q23 factors and give key name as 'factor', value as 'cases'
+
+```
+gather <- gather_spread_test %>% select(contains("Q23_")) %>% gather(Q23_Factor_a, Q23_Factor_b, Q23_Factor_c, Q23_Factor_d, Q23_Factor_e, key = "factor", value = "cases")
+```
+
+## Summary:
+Group by cases and factor, and then count
+```
+gather_summary <- gather %>% group_by(cases, factor) %>% summarise(n = n())
+```
+
+## Now do spread
+Tget the cases column (values 1:5) as column heads, n as values, and factors as rows (5 total)
+There are two ways to do it:
+```
+gather %>% group_by(cases, factor) %>% tally() %>% spread(key = cases, value = n)
+```
+or 
+```
+gather_summary %>% spread(key = cases, value = n)
+
+```
+gather %>% group_by(cases, factor) %>% summarise(n=n()) %>% spread(key = cases, value = n) won't work because it generate the value column as n() not n, so the spread function doesn't recognize value = n
