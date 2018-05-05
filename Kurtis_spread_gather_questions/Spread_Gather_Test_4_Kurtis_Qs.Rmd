@@ -15,32 +15,58 @@ Read the csv file
 library(readr)
 library(dplyr)
 library(tidyr)
-gather_spread_test <- read_csv("Kurtis_spread_gather_questions//gather_spread_test.csv")
+gather_spread_test <- read_csv("gather_spread_test.csv")
 ```
 
 ## Gather:
 
 Gather Q23 factors and give key name as 'factor', value as 'cases'
 
-```
+```{r}
 gather <- gather_spread_test %>% select(contains("Q23_")) %>% gather(Q23_Factor_a, Q23_Factor_b, Q23_Factor_c, Q23_Factor_d, Q23_Factor_e, key = "factor", value = "cases")
 ```
 
 ## Summary:
 Group by cases and factor, and then count
-```
+```{r}
 gather_summary <- gather %>% group_by(cases, factor) %>% summarise(n = n())
 ```
 
 ## Now do spread
 Tget the cases column (values 1:5) as column heads, n as values, and factors as rows (5 total)
 There are two ways to do it:
-```
+```{r}
 gather %>% group_by(cases, factor) %>% tally() %>% spread(key = cases, value = n)
 ```
 or 
-```
+```{r}
 gather_summary %>% spread(key = cases, value = n)
-
 ```
+
 gather %>% group_by(cases, factor) %>% summarise(n=n()) %>% spread(key = cases, value = n) won't work because it generate the value column as n() not n, so the spread function doesn't recognize value = n
+
+
+## Calculate percent of row
+Get the summary by factor and cases using spread
+```{r}
+gather_summary_by_factor <- gather_summary %>% spread(key = cases, value = n)
+```
+
+Calculate the sum of each row
+```{r}
+total_col = apply(gather_summary_by_factor[,-1],1,sum)
+```
+Loop through each column and in each iteration divide that column by the total_col vector
+```{r}
+pcts = lapply(gather_summary_by_factor[,-1],function(x){x/total_col})
+```
+Convert pcts into a dataframe
+```{r}
+pcts = as.data.frame(pcts)
+```
+Combine the pcts outputs into the origina dataframe
+```{r}
+gather_summary_perc <- cbind(gather_summary_by_factor,pcts)
+head(tbl_df(gather_summary_perc))
+```
+
